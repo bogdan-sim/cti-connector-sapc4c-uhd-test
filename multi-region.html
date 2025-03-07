@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>c4c-multi-region</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="css/multi-region.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="js/iwsutils.js"></script>
+    <script>
+        const localStorageKey = "softphoneMultiRegion";
+        const params = localStorage.getItem(localStorageKey);
+        if (params) {
+            window.location.replace(`./index.html?${params}`);
+        }
+    </script>
+
+<body>
+    <div id="container" class="container">
+        <div class="col s12" style="display:flex;justify-content:center">
+            <img src="./img/smart-connector.png" style="width:150px"></img>
+        </div>
+        <div class="col s12" style="text-align:center;color:#4c4c4c;">
+            <h6>SAP C4C Multi Region wrapper page</h6>
+        </div>
+        <div class="input-field col s12 " style="margin-top:40px">
+            <select id="region">
+            </select>
+            <label>Genesys Clour Region</label>
+        </div>
+        <div class="input-field col s12">
+            <select id="language">
+            </select>
+            <label>Language</label>
+        </div>
+        <div class="input-field col s12">
+            <select id="provider">
+            </select>
+            <label>SSO Provider</label>
+        </div>
+        <div class="input-field col s12">
+            <select id="orgName">
+            </select>
+            <label>SSO Org Name</label>
+        </div>
+        <div class="col s12">
+            <label>
+                <input type="checkbox" id="remember" />
+                <span>Remember selection</span>
+            </label>
+        </div>
+        <div class="col s12" style="margin-top:20px">
+            <a id="submit" class="waves-effect waves-light btn-large disabled blue">Submit</a>
+        </div>
+
+    </div>
+
+    <script>
+
+        const languagesParam = saputil.customParseURL("languages", "en-US,fr-FR,de-DE,it-IT");
+        const regionsParam = saputil.customParseURL("regions", "mypurecloud.com,mypurecloud.de,mypurecloud.ie,usw2.pure.cloud,aps1.pure.cloud");
+        const ssoProviders = saputil.customParseURL("ssoProviders", undefined);
+        const ssoOrgNames = saputil.customParseURL("ssoOrgNames", undefined);
+        const ssoEnabled = ssoProviders && ssoOrgNames;
+        const languages = [...languagesParam.split(",")];
+        const regions = [...regionsParam.split(",")];
+        const providers = ssoProviders ? [...ssoProviders.split(",")] : undefined;
+        const orgNames = ssoOrgNames ? [...ssoOrgNames.split(",")] : undefined;
+
+        console.log("languages :", languages);
+        console.log("regions :", regions);
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            languages.forEach(x => $("#language").append(`<option value="${x}">${x}</option>`));
+            regions.forEach(x => $("#region").append(`<option value="${x}">${x}</option>`));
+
+            if (languages.length == 1) {
+                $("#language").v
+            }
+            if (providers && orgNames) {
+                providers.forEach(x => $("#provider").append(`<option value="${x}">${x}</option>`));
+                orgNames.forEach(x => $("#orgName").append(`<option value="${x}">${x}</option>`));
+                $("#provider").append(`<option value=""></option>`);
+                $("#orgName").append(`<option value=""></option>`)
+            } else {
+                $("#provider").addClass("hidden");
+                $("#orgName").addClass("hidden");
+            }
+            $("#language").change(e => {
+                manageChange();
+            });
+            $("#region").change(e => {
+                manageChange();
+            });
+            $("#orgName").change(e => {
+                manageChange();
+            });
+            $("#provider").change(e => {
+                manageChange();
+            });
+            manageChange();
+            $("#submit").on("click", () => {
+                const language = $("#language").val();
+                const region = $("#region").val();
+                const remember = $("#remember").is(":checked");
+                const ctiType = saputil.customParseURL("ctiType", "agentDesktop");
+                const showConnectionLed = saputil.customParseURL("showConnectionLed", "false");
+
+                var params = `pcEnv=${region}&language=${language}&ctiType=${ctiType}&showConnectionLed=${showConnectionLed}`;
+                if (providers && orgNames) {
+                    const ssoProvider = $("#provider").val();
+                    const ssoOrgName = $("#orgName").val();
+                    params = params.concat(`&ssoProvider=${ssoProvider}&ssoOrgName=${ssoOrgName}`);
+                }
+                if (remember) {
+                    localStorage.setItem(localStorageKey, params);
+                }
+                console.log(`sumbmit, language=${language}, region=${region}, remember=${remember}`);
+                window.location.replace(`./index.html?${params}`);
+            });
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems, []);
+        });
+
+        function manageChange() {
+            const language = $("#language").val();
+            const region = $("#region").val();
+
+            if (language && region) {
+                if (ssoEnabled) {
+                    const ssoProvider = $("#provider").val();
+                    const ssoOrgName = $("#orgName").val();
+                    if ( (ssoProvider && ssoOrgName ) || (!ssoProvider && !ssoOrgName) ) {
+                        $("#submit").removeClass("disabled");
+                    }else {
+                        $("#submit").addClass("disabled");
+                    }
+                } else {
+                    $("#submit").removeClass("disabled");
+                }
+
+            } else {
+                $("#submit").addClass("disabled");
+            }
+        }
+    </script>
+
+</body>
+
+</html>

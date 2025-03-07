@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .content-fulladmin{
+            border: none;
+            padding: none;
+            width: 100%;
+            height: 800px;
+            position: absolute;
+            top: -61px;
+            left: -54px;
+        }
+    </style>
+
+</head>
+
+<body onload="init()">
+    <script>
+
+        var LoggerIxn = /** @class */ (function() {
+            function LoggerIxn() {}
+            LoggerIxn.prototype.info = function() {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                var originalLog = console.info;
+                originalLog.apply(console.info, [this.getCurrentDate()].concat(args));
+            };
+            LoggerIxn.prototype.getCurrentDate = function() {
+                return "[" + new Date().toISOString() + "] pureClientIXN *** ";
+            };
+            return LoggerIxn;
+        }());
+        var loggerIxn = new LoggerIxn();
+
+        function customParseURL(skey, sdefault) {
+            if (!window.customUrlParams) {
+                window.customUrlParams = [];
+                var hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for (var i = 0; i < hashes.length; i++) {
+                    hash = hashes[i].split('=');
+                    window.customUrlParams.push(hash[0]);
+                    window.customUrlParams[hash[0]] = hash[1];
+                }
+            }
+            var retval = window.customUrlParams[skey];
+            return (retval ? retval : sdefault);
+        }
+
+        function printError(error) {
+            var htmlError = "";
+            htmlError += '<div id="errorContainer" class="empty-interaction-indicator"><div id="iconError" class="empty-interaction-icon"><i "iconTimes" class="fas fa-times"></i><div>'
+            htmlError += '<div><h5 style="color:#000">' + error + '</h5></div>'
+            document.getElementById("messageError").innerHTML = htmlError;
+            document.getElementById("errorContainer").style.width = "100%";
+            document.getElementById("errorContainer").style.position = "absolute";
+            document.getElementById("iconError").style.width = "100%";
+            document.getElementById("errorContainer").style.textAlign = "center";
+            document.getElementById("loader").style.display = "none";
+        }
+        
+        function init() {
+            var interactionId = customParseURL('id', null);
+            var environment = customParseURL('pcEnv', null);
+            
+            if (!environment) {
+                environment = localStorage.getItem("pureCloudEnvironment");
+                if (!environment) {
+                    printError("Cannot find the Genesys Cloud region, login with your embeddable widget and retry");
+                    return;
+                }
+            }
+            var interactionId = customParseURL('id', null);
+            if (interactionId.indexOf("-") < 0) {
+                console.log("interactionid is not in uuid format, adding dashes");
+                interactionId = interactionId.toLowerCase();
+                interactionId = interactionId.slice(0, 20) + "-" + interactionId.slice(20);
+                interactionId = interactionId.slice(0, 16) + "-" + interactionId.slice(16);
+                interactionId = interactionId.slice(0, 12) + "-" + interactionId.slice(12);
+                interactionId = interactionId.slice(0, 8) + "-" + interactionId.slice(8);
+                console.log("interactionid : ", interactionId)
+            }
+            
+            var webappurl = 'https://apps.' + environment + '/directory/#/engage/admin/interactions/' + interactionId;
+            document.getElementsByTagName('body')[0].innerHTML=`<iframe id='fulladminframe' src=${webappurl} class="content-fulladmin"/>`;
+        }
+
+        
+    </script>
+    <style>
+
+    </style>
+
+    <div id="messageError"></div>
+
+   
+</body>
+
+</html>
