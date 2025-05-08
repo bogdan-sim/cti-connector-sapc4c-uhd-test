@@ -1,11 +1,23 @@
-"networking": {
-  "allowedIpRanges": ["AzureFrontDoor.Backend"]
-}
-"forwardingGateway": {
-  "requiredHeaders": {
-    "X-Azure-FDID" : "702560a8-e953-4be7-979d-e772f0fb1e7a"
-  },
-  "allowedForwardedHosts": [
-    "my-sitename.azurefd.net"
-  ]
+{
+    "routes": [
+        {
+            "route": "/index.html"
+        }
+    ],
+    "networking": {
+        "allowedIpRanges": [
+            "AzureFrontDoor.Backend",
+            "168.63.129.16/32",
+            "169.254.169.254/32"
+        ]
+    },
+    "forwardingGateway": {
+        "requiredHeaders": {
+            "X-Azure-FDID": "702560a8-e953-4be7-979d-e772f0fb1e7a"
+        },
+        "allowedForwardedHosts": [
+            "GenesysCX-FrontDoor-C4CS-test-f0b7c4f2bybpbyem.a02.azurefd.net",
+            "GenesysCX-FrontDoor-C4UHD-test-ftczgzg9a8gkgycx.a02.azurefd.net"
+        ]
+    }
 }
