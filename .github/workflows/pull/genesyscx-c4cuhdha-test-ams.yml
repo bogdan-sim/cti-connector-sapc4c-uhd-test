@@ -1,0 +1,29 @@
+name: Build and deploy .NET app to Azure Web App using publish profile
+
+env:               
+  AZURE_WEBAPP_NAME:   genesyscx-c4cuhdha-test-ams      # set this to the name of your web app
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+
+on: [push]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: 'Deploy to Azure WebApp'
+      uses: azure/webapps-deploy@v3
+      with: 
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_C4CUHDHA_AMS }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        clean: true
+        target-path: /home/site/wwwroot
+        restart: true
